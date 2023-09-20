@@ -6,6 +6,7 @@ import { pool } from '../config/db';
 import Cipher from '../helpers/cipher';
 import { signAccessToken } from '../helpers/accessToken';
 import { ILoginService, ISignUpService } from '../interfaces/auth';
+import Amqp from '../helpers/amqp';
 
 export default class AuthServices {
   static loginService = async (req: Request): Promise<IServiceResponse> => {
@@ -46,12 +47,13 @@ export default class AuthServices {
     const hashedPassword = await Cipher.encrypt(password);
     const response = await pool.query(
       'INSERT INTO users (username, password_hash, email) VALUES ($1, $2, $3) RETURNING id',
-      [username, hashedPassword, email],
+      [username, hashedPassword, email]
     );
     const user = response.rows[0];
-    await pool.query('INSERT INTO user_wallets (user_id) VALUES ($1)', [
-      user?.id,
-    ]);
+    await Amqp.send({ queue: 'create-wallet', data: { user_id: user?.id } });
+    // await pool.query('INSERT INTO user_wallets (user_id) VALUES ($1)', [
+    //   user?.id,
+    // ]);
 
     return {
       type: 'Success',
