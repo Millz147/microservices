@@ -10,14 +10,16 @@ export default class UserServices {
     const user = await pool.query('SELECT * FROM users WHERE id = $1', [
       user_id,
     ]);
-    if (!user) {
+
+    if (!user.rows.length) {
       ThrowException.badRequest('Unrecognized User.!!!');
     }
+    const data = user.rows[0];
     return {
       type: 'Success',
       status: StatusCodes.ACCEPTED,
       message: 'Success',
-      data: { user },
+      data,
     };
   };
 }

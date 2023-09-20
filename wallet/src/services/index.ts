@@ -16,8 +16,8 @@ export default class WalletServices {
 
     const result = await pool.query(query);
 
-    if (result.rows.length === 0) {
-      ThrowException.notFound('Wallet NotFound');
+    if (!result.rows.length) {
+      ThrowException.notFound('Wallet Not Found');
     }
 
     const data = result.rows[0];

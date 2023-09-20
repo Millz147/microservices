@@ -12,3 +12,4 @@ export interface IControllerResponse {
   message: string;
   data?: any;
 }
+

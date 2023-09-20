@@ -22,7 +22,7 @@ CREATE TABLE user_payments (
   reference_id: TEXT NOT NULL,
   description TEXT,
   success BOOLEAN DEFAULT false,
-  status TEXT CHECK (status IN ('success', 'pending', 'failure')),
+  status TEXT CHECK (status IN ('success', 'pending', 'failure')) DEFAULT 'pending',
   created_at TIMESTAMP DEFAULT NOW(),
   payment_date TIMESTAMP NOT NULL DEFAULT NOW(),
   FOREIGN KEY (user_id) REFERENCES users(id)

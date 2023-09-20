@@ -7,7 +7,7 @@ import Cipher from '../helpers/cipher';
 import { signAccessToken } from '../helpers/accessToken';
 import { ILoginService, ISignUpService } from '../interfaces/auth';
 
-export default class Auth {
+export default class AuthServices {
   static loginService = async (req: Request): Promise<IServiceResponse> => {
     const { username, password } = req.body as ILoginService;
     const user = await pool.query('SELECT * FROM users WHERE username = $1', [
@@ -32,9 +32,7 @@ export default class Auth {
       data: { token },
     };
   };
-  static signUpService = async (
-    req: Request
-  ): Promise<IServiceResponse> => {
+  static signUpService = async (req: Request): Promise<IServiceResponse> => {
     const { username, password, email } = req.body as ISignUpService;
     const userExists = await pool.query(
       'SELECT * FROM users WHERE username = $1 OR email = $2',
@@ -46,15 +44,19 @@ export default class Auth {
 
     const saltRounds = 10;
     const hashedPassword = await Cipher.encrypt(password);
-    await pool.query(
-      'INSERT INTO users (username, password_hash, email) VALUES ($1, $2, $3)',
-      [username, hashedPassword, email]
+    const response = await pool.query(
+      'INSERT INTO users (username, password_hash, email) VALUES ($1, $2, $3) RETURNING id',
+      [username, hashedPassword, email],
     );
+    const user = response.rows[0];
+    await pool.query('INSERT INTO user_wallets (user_id) VALUES ($1)', [
+      user?.id,
+    ]);
 
     return {
       type: 'Success',
       status: StatusCodes.ACCEPTED,
-      message: 'User Login Success',
+      message: 'Sign Up Success',
       data: [],
     };
   };

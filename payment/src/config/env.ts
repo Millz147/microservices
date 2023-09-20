@@ -10,3 +10,4 @@ export const DB_CONFIG = {
   password: process.env.DB_PASS!,
   port: Number(process.env.DB_PORT!),
 };
+export const BASEURL = process.env.APP_BASE_URL;
